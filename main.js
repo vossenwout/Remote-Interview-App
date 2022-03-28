@@ -46,7 +46,7 @@ const hangupButton = document.getElementById('hangupButton');
 
 webcamButton.onclick = async () => {
   //localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  
+
   // mobile werkt enkel vanaf https -> dus we moeten op heroku deployen
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
   
@@ -67,6 +67,8 @@ webcamButton.onclick = async () => {
   localStream.getTracks().forEach((track) => {
     pc.addTrack(track, localStream);
   });
+
+  
 
   // Pull tracks from remote stream, add to video stream
   pc.ontrack = (event) => {
