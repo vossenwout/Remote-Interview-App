@@ -3,6 +3,7 @@ import './style.css';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
+// de config van de firestore die ik opgezet heb. Soort van database.
 const firebaseConfig = {
   apiKey: "AIzaSyCJKgJ9ZiJ5u4d8FmYyOltI3w15YVkc1VY",
   authDomain: "fir-rtc-46f38.firebaseapp.com",
@@ -13,7 +14,8 @@ const firebaseConfig = {
   measurementId: "G-3KKB8MV3R4"
 };
 
-
+// firebase wordt gebruikt als database waarmee clients elkaar voor de eerste keer kunnen bereiken
+// daarna werkt het p2p over udp
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -50,17 +52,6 @@ webcamButton.onclick = async () => {
   // mobile werkt enkel vanaf https -> dus we moeten op heroku deployen
   localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
   
-  //const vid = document.getElementById('webcamVideo')
-
-  //vid.srcObject = localStream;
-
-  //navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-  //.then(stream => {
-  //  const vid = document.getElementById('html5vid');
-  //  vid.autoplay = true;
-  //  vid.muted = true;
-  //  vid.srcObject = stream;
-  //});
   remoteStream = new MediaStream();
 
   // Push tracks from local stream to peer connection
@@ -73,7 +64,7 @@ webcamButton.onclick = async () => {
   // Pull tracks from remote stream, add to video stream
   pc.ontrack = (event) => {
     event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);
+      remoteStream.addTrack(track);d
     });
   };
 
