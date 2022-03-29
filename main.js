@@ -64,7 +64,7 @@ webcamButton.onclick = async () => {
   // Pull tracks from remote stream, add to video stream
   pc.ontrack = (event) => {
     event.streams[0].getTracks().forEach((track) => {
-      remoteStream.addTrack(track);d
+      remoteStream.addTrack(track);
     });
   };
 
