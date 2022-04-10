@@ -62,7 +62,7 @@ const Section = ({children, title}) => {
 };
 
 const App = () => {
-
+  //Source: https://github.com/react-native-webrtc/react-native-webrtc
   const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
   const pc = new RTCPeerConnection(configuration);
 
