@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AwesomeProject.iml" filepath="$PROJECT_DIR$/.idea/modules/AwesomeProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/AwesomeProject.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/AwesomeProject.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/314506792/react-native-gradle-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/314506792/react-native-gradle-plugin.iml" />
+    </modules>
+  </component>
+</project>
