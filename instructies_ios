@@ -1,0 +1,11 @@
+firebase setup:
+https://rnfirebase.io/#3-ios-setup
+
+
+pods installen in ios file:
+sudo arch -x86_64 gem install ffi
+arch -x86_64 pod install         
+
+meerdere simulators:
+npx react-native run-ios --simulator="iPhone 13"
+npx react-native run-ios --simulator="iPhone 12"
