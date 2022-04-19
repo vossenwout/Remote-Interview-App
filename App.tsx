@@ -19,6 +19,7 @@ import {
 import Utils from "./Utils"
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 
+
 const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
   const pc = useRef<RTCPeerConnection>();
   const connecting = useRef(false);
 
+  // Gets called when componen mounts
   useEffect(()=> {
     const cRef = firestore().collection('meet').doc('chatId');
 
@@ -49,9 +51,10 @@ export default function App() {
     // The other side has clicked on hangup
     const subscribeDelete =  cRef.collection('callee').onSnapshot(snapshot =>
       {
-        snapshot.docChanges().forEach(change =>{
-          if (change.type == 'remove'){
-             hangup()
+        snapshot.docChanges().forEach((change) =>{
+          if (change.type == 'removed'){
+            console.log("Hung up");
+            hangup()
           }
         });
       });
@@ -95,8 +98,9 @@ export default function App() {
     if(pc.current){
       // Create the offer for the call
       // Store the offer under the document
-      const offer = await pc.current.createOffer(); 
+      const offer = await pc.current.createOffer(undefined); 
       pc.current.setLocalDescription(offer);
+
  
       const cWithOffer = {
         offer: {
@@ -110,6 +114,8 @@ export default function App() {
     }
 
   };
+
+
   const join = async () => {
     console.log("Joining the call");
     connecting.current = true;
@@ -197,8 +203,9 @@ export default function App() {
   ) => {
     const candidateCollection = cRef.collection(localName);
 
+
     if(pc.current){
-      // on new ICE candidate ass it to firesstore
+      // on new ICE candidate add it to firesstore
       pc.current.onicecandidate = (event) => {
         if(event.candidate){
           candidateCollection.add(event.candidate);

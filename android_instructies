@@ -1,2 +1,6 @@
+
+
+
+Als je error krijgt bij npx react-native run-android dat er geen emulators te vinden zijn
 (zodat react native de android emulators kan vinden voer dit in terminal uit mac only)
 source $HOME/.zprofile    

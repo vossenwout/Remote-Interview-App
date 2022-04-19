@@ -1,6 +1,10 @@
 ----------------
 algemeen:
 
+Uitleg webrtc:
+https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API
+
+
 als icoontjes niet werken of je error krijgt font niet installed
 ga correct installeren en hier troubleshooten
 https://github.com/oblador/react-native-vector-icons#red-screen-with-unrecognized-font-family-error-on-ios
@@ -25,5 +29,14 @@ Android hulp:
 Als je error krijgt bij npx react-native run-android dat er geen emulators te vinden zijn
 (zodat react native de android emulators kan vinden voer dit in terminal uit mac only bash commandos zoek op)
 source $HOME/.zprofile    
+
+
+meerdere emulators:
+
+open beide in android studio
+run commands in terminal
+
+npx react-native run-android --deviceId='emulator-5556' 
+npx react-native run-android --deviceId='emulator-5554' 
 
 --------------
