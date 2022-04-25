@@ -1,0 +1,110 @@
+{
+    "_firestore": {
+        "_app": {
+            "_automaticDataCollectionEnabled": true,
+            "_deleteApp": [Function bound deleteApp
+            ],
+            "_deleted": false,
+            "_initialized": true,
+            "_name": "[DEFAULT]",
+            "_nativeInitialized": true,
+            "_options": [Object
+            ]
+        },
+        "_config": {
+            "ModuleClass": [Function FirebaseFirestoreModule
+            ],
+            "hasCustomUrlOrRegionSupport": false,
+            "hasMultiAppSupport": true,
+            "namespace": "firestore",
+            "nativeEvents": [Array
+            ],
+            "nativeModuleName": [Array
+            ],
+            "statics": [Object
+            ],
+            "version": "14.7.0"
+        },
+        "_customUrlOrRegion": undefined,
+        "_nativeModule": {
+            "RNFBFirestoreCollectionModule": true,
+            "RNFBFirestoreDocumentModule": true,
+            "RNFBFirestoreModule": true,
+            "RNFBFirestoreTransactionModule": true,
+            "clearPersistence": [Function anonymous
+            ],
+            "collectionGet": [Function anonymous
+            ],
+            "collectionOffSnapshot": [Function anonymous
+            ],
+            "collectionOnSnapshot": [Function anonymous
+            ],
+            "disableNetwork": [Function anonymous
+            ],
+            "documentBatch": [Function anonymous
+            ],
+            "documentDelete": [Function anonymous
+            ],
+            "documentGet": [Function anonymous
+            ],
+            "documentOffSnapshot": [Function anonymous
+            ],
+            "documentOnSnapshot": [Function anonymous
+            ],
+            "documentSet": [Function anonymous
+            ],
+            "documentUpdate": [Function anonymous
+            ],
+            "enableNetwork": [Function anonymous
+            ],
+            "getConstants": [Function anonymous
+            ],
+            "setLogLevel": [Function anonymous
+            ],
+            "settings": [Function anonymous
+            ],
+            "terminate": [Function anonymous
+            ],
+            "transactionApplyBuffer": [Function anonymous
+            ],
+            "transactionBegin": [Function anonymous
+            ],
+            "transactionDispose": [Function anonymous
+            ],
+            "transactionGetDocument": [Function anonymous
+            ],
+            "useEmulator": [Function anonymous
+            ],
+            "waitForPendingWrites": [Function anonymous
+            ]
+        },
+        "_referencePath": {
+            "_parts": [Array
+            ]
+        },
+        "_settings": {
+            "ignoreUndefinedProperties": false
+        },
+        "_transactionHandler": {
+            "_firestore": [Circular
+            ],
+            "_pending": [Object
+            ]
+        }
+    },
+    "_isMetadataChange": false,
+    "_nativeData": {
+        "doc": {
+            "data": [Object
+            ],
+            "exists": true,
+            "metadata": [Array
+            ],
+            "path": "meet/chatId/caller/9IRsWHFLjrjFN6EOYop8"
+        },
+        "isMetadataChange": false,
+        "ni": -1,
+        "oi": 1,
+        "type": "r"
+    }
+}

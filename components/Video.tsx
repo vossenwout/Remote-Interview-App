@@ -19,7 +19,7 @@ function ButtonContainer(props: Props){
 export default function Video(props: Props){
     // On call the local stream gets displayed
     if( props.localStream && !props.remoteStream){
-        console.log("local")
+       
         return (<View style = {styles.container}> 
             <RTCView 
                 streamURL= {props.localStream.toURL()}
@@ -33,7 +33,7 @@ export default function Video(props: Props){
     // Once call is connected we display local 
     // on top of remote
     if( props.localStream && props.remoteStream){
-        console.log("both")
+       
         return (<View style = {styles.container}> 
                 <RTCView 
                 streamURL= {props.remoteStream.toURL()}
@@ -47,7 +47,7 @@ export default function Video(props: Props){
              </View>
         );
     }
-    console.log("no")
+  
     return <ButtonContainer hangup ={props.hangup} />;
     
 }
