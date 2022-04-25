@@ -30,7 +30,7 @@ export default function SelectCreateScreen({ navigation }) {
             <Button
                 title="Create room"
                 onPress={() => {
-                    navigation.navigate("WaitingRoomScreen", {
+                    navigation.navigate("CreateRoomScreen", {
                         roomCode: roomCode
                     });
                 }

@@ -14,7 +14,7 @@ export default function HomeScreen({ navigation }) {
             <Button
                 title="Join meeting"
                 onPress={() => {
-                    navigation.navigate('JoinScreen')
+                    navigation.navigate('SelectJoinScreen')
                 }
                 }
             />
@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation }) {
             <Button
                 title="Create meeting"
                 onPress={() => {
-                    navigation.navigate('WaitingRoomScreen')
+                    navigation.navigate('SelectCreateScreen')
                 }
                 }
             />

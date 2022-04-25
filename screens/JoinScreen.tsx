@@ -31,19 +31,110 @@ const configuration = { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }
 export default function JoinScreen({ route, navigation }) {
   const [localStream, setLocalStream] = useState<MediaStream | null>()
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>()
-  const [gettingCall, setGettingCall] = useState(false);
   const pc = useRef<RTCPeerConnection>();
-  const [meetingLinkInput, onChangeMeetingLinkInput] = useState<string>();
 
   var iceListener;
-  var removeListener;
 
+
+  // Gets called when componen mounts
+  useEffect(() => {
+    console.log("using effect")
+    const cRef = firestore().collection('meet').doc(route.params.roomCode);
+
+
+    // On delte of collection call hangup
+    // The other side has clicked on hangup
+    const subscribeDelete = cRef.collection('callee').onSnapshot(snapshot => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type == 'removed') {
+          console.log("Hung up");
+          hangup()
+        }
+      });
+    });
+
+
+    const join = async () => {
+
+      // wait untill caller has put the call offer in the firebase
+      const offer = (await cRef.get()).data()?.offer;
+
+      if (offer) {
+
+        // Setup Webrtc
+        await setUpWebrtc()
+
+        // Exchange the ICE candidates
+        collectIceCandidates(cRef, "callee", "caller")
+
+        if (pc.current) {
+          await pc.current.setRemoteDescription(new RTCSessionDescription(offer)).catch(e => {
+            console.log("failure with setting remote description join screen")
+            console.log(e)
+          });
+
+          // Create the answer for the call
+          // Update the document with answer
+          const answer = await pc.current.createAnswer().catch(e => {
+            console.log("cannot create answer")
+            console.log(e)
+          });;
+
+          pc.current.setLocalDescription(answer).catch(e => {
+            console.log("failure with setting local Descprtion")
+            console.log(e)
+          });
+
+          const cWithAnswer = {
+            answer: {
+              type: answer.type,
+              sdp: answer.sdp,
+            },
+          };
+
+          cRef.update(cWithAnswer).catch(e => {
+            console.log("failure updating answer")
+            console.log(e)
+          });
+        }
+      }
+
+    };
+
+    join()
+
+    return () => {
+      if (iceListener) {
+        iceListener();
+      }
+      subscribeDelete();
+    }
+
+
+  }, [])
+
+  const setUpWebrtc = async () => {
+    console.log("Setting up webrtc join screen")
+    pc.current = new RTCPeerConnection(configuration);
+
+    // Get the audio and video stream for the call
+    const stream = await Utils.getStream().catch(error => console.log(error))
+    if (stream) {
+      setLocalStream(stream);
+      pc.current.addStream(stream);
+    }
+
+    // Get the remote sstream once it is available
+    pc.current.onaddstream = (event) => {
+      setRemoteStream(event.stream)
+    }
+  };
 
   const hangup = async () => {
     if (pc.current) {
       console.log("hanging up joining")
       // remove listeners
-      removeListeners()
+      //removeListeners()
       //connecting.current = false;
       await streamCleanUp().catch(e => {
         console.log("failure with cleaning stream")
@@ -64,8 +155,6 @@ export default function JoinScreen({ route, navigation }) {
 
     //navigation.navigate('HomeScreen');
 
-
-
   };
 
 
@@ -73,7 +162,7 @@ export default function JoinScreen({ route, navigation }) {
     if (pc.current) {
       console.log("other hun up (joining)")
 
-      removeListeners();
+      //removeListeners();
       await streamCleanUp().catch(e => {
         console.log("failure with cleaning stream")
         console.log(e)
@@ -92,19 +181,6 @@ export default function JoinScreen({ route, navigation }) {
 
   };
 
-  const removeListeners = () => {
-    if (removeListener || iceListener) {
-      console.log("remove listeners joining")
-      if (removeListener) {
-        removeListener();
-        removeListener = null;
-      }
-      if (iceListener) {
-        iceListener();
-        iceListener = null;
-      }
-    }
-  }
 
   // Helper function
   const streamCleanUp = async () => {
@@ -122,7 +198,7 @@ export default function JoinScreen({ route, navigation }) {
 
   const fireStoreCleanUp = async () => {
     //const cRef = firestore().collection('meet').doc('chatId');
-    const cRef = firestore().collection('meet').doc(meetingLinkInput);
+    const cRef = firestore().collection('meet').doc(route.params.roomCode);
 
 
     if (cRef) {
@@ -201,117 +277,29 @@ export default function JoinScreen({ route, navigation }) {
 
 
 
-  const join = async () => {
 
+  if (localStream) {
+    console.log("getting call in joining")
+    console.log("remote stream")
 
-    //connecting.current = true;
-    //setGettingCall(false);
+    //return (
+    //    <View style={styles.videoContainer}>
+    //        <Text> Hello</Text>
 
-    //const cRef = firestore().collection('meet').doc('chatId');
+    //    </View>
+    //)
 
-    const cRef = firestore().collection('meet').doc(meetingLinkInput);
+    //TODO dit loopt fout de 2de keer (enkel op ios).3
 
-    const offer = (await cRef.get()).data()?.offer;
+    // we kunnen niet de remote stream displayen
+    //return (<View style = {styles.RTCcontainer}> 
+    //    <RTCView 
+    //   streamURL= {remoteStream.toURL()}
+    //   objectFit={'cover'}
+    //    style={styles.video}/>
+    //</View>
+    //   )       ;
 
-
-
-    if (offer) {
-
-      // Setup Webrtc
-      //await setUpWebrtc()
-
-      // Communication over webrtc happens with peer connection
-      pc.current = new RTCPeerConnection(configuration);
-
-      // Get the audio and video stream for the call
-      const stream = await Utils.getStream().catch(error => console.log(error))
-
-      // Add local stream to peer connection
-      if (stream) {
-        setLocalStream(stream);
-        pc.current.addStream(stream);
-      }
-
-      // Get the remote sstream once it is available
-      pc.current.onaddstream = (event) => {
-        console.log("new stream joining")
-        setRemoteStream(event.stream)
-        // van zodra er een remote stream beschikbaar is navigaten we naar het callscreen
-        setGettingCall(true);
-      }
-
-      // Exchange the ICE candidates
-
-
-
-      // check the parameters its reversed since the joing part is callee
-      collectIceCandidates(cRef, "callee", "caller")
-
-
-
-      if (pc.current) {
-        await pc.current.setRemoteDescription(new RTCSessionDescription(offer)).catch(e => {
-          console.log("failure with setting remote description join screen")
-          console.log(e)
-        });
-
-
-        clearLeftOverEvents(cRef)
-        // if info is removed from the database the callee has hung up and we end the stream
-        // (normaal van calleer checken)
-        removeListener = cRef.collection('callee').onSnapshot(snapshot => {
-
-          snapshot.docChanges().forEach(async (change) => {
-            if (change.type == 'removed') {
-              console.log("remove info detected in joining")
-              console.log(change.type)
-              console.log(change.doc)
-              //await hangup().catch(e => {
-              // console.log("failure with haning up waiting room")
-              //  console.log(e)
-              // })
-              //removeListeners();
-              callerHungup();
-            }
-          });
-        });
-
-        // Create the answer for the call
-        // Update the document with answer
-        const answer = await pc.current.createAnswer().catch(e => {
-          console.log("cannot create answer")
-          console.log(e)
-        });;
-
-        pc.current.setLocalDescription(answer).catch(e => {
-          console.log("failure with setting local Descprtion")
-          console.log(e)
-        });
-
-        const cWithAnswer = {
-          answer: {
-            type: answer.type,
-            sdp: answer.sdp,
-          },
-        };
-
-        cRef.update(cWithAnswer).catch(e => {
-          console.log("failure updating answer")
-          console.log(e)
-        });
-      }
-    }
-
-
-
-    /**
-     * For disconnecting the call close the connection, release the stream
-     * Delte the document for the call
-     */
-
-  };
-
-  if (gettingCall) {
     return (
       <View style={styles.videoContainer}>
         <Video hangup={hangup} localStream={localStream} remoteStream={remoteStream} />
@@ -321,27 +309,18 @@ export default function JoinScreen({ route, navigation }) {
 
   }
 
-  // displayed uw local en remote stream als connected
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Fill in meeting link</Text>
-      <TextInput
-        style={styles.input}
-        value={meetingLinkInput}
-        onChangeText={onChangeMeetingLinkInput}
 
-      />
-      <Button
-        title="Join"
-        onPress={() => {
-          join()
-        }
-        }
-      />
+  // display uw local stream
+  return (
+
+    <View style={styles.container}>
+      <Text>Turn on screen</Text>
     </View>
 
 
-  )
+  );
+
+
 }
 
 const styles = StyleSheet.create({
