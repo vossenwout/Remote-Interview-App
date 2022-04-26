@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC Demo</title>
+  </head>
+  <body>
+    <h2>1. Zet webcam aan</h2>
+    <div class="videos">
+      <span>
+        <h3>Jouw webcam</h3>
+        <video id="webcamVideo" autoplay playsinline></video>
+      </span>
+      <span>
+        <h3>Andere persoon webcam</h3>
+        <video id="remoteVideo" autoplay playsinline></video>
+      </span>
+
+
+    </div>
+
+    <button id="webcamButton">Zet webcam aan</button>
+    <h2>2. Creëer code zodat andere persoon call can joinen</h2>
+    <button id="callButton" disabled>Creëer Call code</button>
+
+    <h2>3. Join call van andere persoon</h2>
+    <p>Vul hier de code van de andere persoon in</p>
+    
+    <input id="callInput" />
+    <button id="answerButton" disabled>Answer</button>
+
+    <h2>4. Stop call</h2>
+
+    <button id="hangupButton" disabled>Stop call</button>
+
+    <script type="module" src="/main.js"></script>
+
+  </body>
+</html>
