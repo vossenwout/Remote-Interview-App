@@ -40,10 +40,11 @@ let remoteStream = null;
 const inviteButton = document.getElementById('inviteButton');
 const inviteMessage = document.getElementById('inviteMessage');
 const plannedInterviewsList = document.getElementById('plannedInterviews');
-const webcamButton = document.getElementById('webcamButton');
+
 const webcamVideo = document.getElementById('webcamVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 const hangupButton = document.getElementById('hangupButton');
+//const testButton = document.getElementById('testButton')
 
 
 
@@ -52,13 +53,40 @@ var subscribe;
 var subscribeDelete;
 var iceListener;
 
+var roomId;
 
 // 1. Setup media sources
 
-webcamButton.onclick = async () => {
-    //localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+const fetchMeetings = async () => {
 
-    // mobile werkt enkel vanaf https -> dus we moeten op heroku deployen
+    const callDoc = firestore.collection('plannedInterviews').doc("Wout")
+    const data = await callDoc.get();
+    const key_value_pairs = data.data();
+
+    plannedInterviewsList.innerHTML = ''
+    Object.entries(key_value_pairs).forEach(([key, value]) => {
+        console.log(`${key}: ${value}`)
+
+
+        var button = document.createElement('button');
+        button.innerHTML = value;
+        button.onclick = function () { call(key); }
+
+
+        plannedInterviewsList.appendChild(button)
+
+    });
+
+
+};
+
+
+
+
+
+
+
+const setUpWebRTC = async () => {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 
     remoteStream = new MediaStream();
@@ -82,13 +110,14 @@ webcamButton.onclick = async () => {
     webcamVideo.autoplay = true;
     webcamVideo.muted = true;
 
+
     webcamVideo.srcObject = localStream;
     remoteVideo.srcObject = remoteStream;
 
-    callButton.disabled = false;
+    //callButton.disabled = false;
     //answerButton.disabled = false;
-    webcamButton.disabled = true;
-};
+    //webcamButton.disabled = true;
+}
 
 
 inviteButton.onclick = async () => {
@@ -98,69 +127,11 @@ inviteButton.onclick = async () => {
     var callInfo = {}
     callInfo[uuid] = inviteMessage.value
     //callDoc.update(callInfo)
-    callDoc.set(callInfo, {merge: true})
+    callDoc.set(callInfo, { merge: true })
     //callDoc.set({ "bd": inviteMessage.value })
 }
 
 
-// 2. Create an offer
-callButton.onclick = async () => {
-    // Reference Firestore collections for signaling
-    const callDoc = firestore.collection('meet').doc("wouttest");
-
-
-    // Listen for remote answer
-    subscribe = callDoc.onSnapshot((snapshot) => {
-        const data = snapshot.data();
-        if (!pc.currentRemoteDescription && data?.answer) {
-            const answerDescription = new RTCSessionDescription(data.answer);
-            pc.setRemoteDescription(answerDescription);
-        }
-    });
-
-    subscribeDelete = callDoc.collection('callee').onSnapshot(snapshot => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type == 'removed') {
-                console.log("remove info detected in waiting");
-                //hangup()
-                hangup()
-            }
-        });
-    });
-
-    collectIceCandidates(callDoc, "caller", "callee")
-
-    // Get candidates for caller, save to db
-    //pc.onicecandidate = (event) => {
-    //    event.candidate && offerCandidates.add(event.candidate.toJSON());
-    //};
-
-
-    // Create offer
-    if (pc) {
-        const offerDescription = await pc.createOffer();
-        await pc.setLocalDescription(offerDescription);
-
-        const offer = {
-            sdp: offerDescription.sdp,
-            type: offerDescription.type,
-        };
-
-        await callDoc.set({ offer });
-    }
-
-    // When answered, add candidate to peer connection
-    //answerCandidates.onSnapshot((snapshot) => {
-    //    snapshot.docChanges().forEach((change) => {
-    //        if (change.type === 'added') {
-    //            const candidate = new RTCIceCandidate(change.doc.data());
-    // /           pc.addIceCandidate(candidate);
-    //        }
-    //    });
-    //});
-
-    //hangupButton.disabled = false;
-};
 
 
 // collect ice candidates
@@ -232,7 +203,8 @@ const hangup = async () => {
             console.log(e)
         });
 
-      
+        // removed planned interviews
+
     }
     //navigation.navigate('HomeScreen');
 
@@ -254,8 +226,20 @@ const streamCleanUp = async () => {
 const fireStoreCleanUp = async () => {
 
     //const cRef = firestore().collection('meet').doc('chatId');
-    const cRef = firestore.collection('meet').doc("wouttest");
+    //const cRef = firestore.collection('meet').doc("wouttest");
+    console.log(roomId);
 
+
+    //removeMeeting()
+
+    const callDoc = firestore.collection('plannedInterviews').doc("Wout")
+
+    callDoc.update({
+        ['' + roomId]: firebase.firestore.FieldValue.delete()
+    });
+
+
+    const cRef = firestore.collection('meet').doc(roomId);
     if (cRef) {
         const calleeCandidate = await cRef.collection('callee').get();
         calleeCandidate.forEach(async (candidate) => {
@@ -273,16 +257,25 @@ const fireStoreCleanUp = async () => {
 };
 
 
-const callDoc = firestore.collection('plannedInterviews').doc("Wout");
 
+
+const callDoc = firestore.collection('plannedInterviews').doc("Wout");
+// add planned interviews to list
 callDoc.onSnapshot((snapshot) => {
     plannedInterviewsList.innerHTML = ''
     if (snapshot.data()) {
         Object.entries(snapshot.data()).forEach(([key, value]) => {
             //console.log(`${key}: ${value}`)
-            var node = document.createElement('li');
-            node.appendChild(document.createTextNode(value));
-            plannedInterviewsList.appendChild(node)
+            //var node = document.createElement('li');
+            //node.appendChild(document.createTextNode(value));
+
+            var button = document.createElement('button');
+            button.innerHTML = value;
+            button.onclick = function () { call(key); }
+
+            //button.setAttribute('onclick','call(' +key + ')')
+
+            plannedInterviewsList.appendChild(button)
         });
     }
 
@@ -291,6 +284,73 @@ callDoc.onSnapshot((snapshot) => {
     //plannedInterviewsList.appendChild(node)
 
 });
+
+
+
+//fetchMeetings()
+
+
+const call = async (chatId) => {
+    // Reference Firestore collections for signaling
+
+    await setUpWebRTC();
+
+    roomId = chatId;
+    const callDoc = firestore.collection('meet').doc(chatId);
+
+
+    // Listen for remote answer
+    subscribe = callDoc.onSnapshot((snapshot) => {
+        const data = snapshot.data();
+        if (!pc.currentRemoteDescription && data?.answer) {
+            const answerDescription = new RTCSessionDescription(data.answer);
+            pc.setRemoteDescription(answerDescription);
+        }
+    });
+
+    subscribeDelete = callDoc.collection('callee').onSnapshot(snapshot => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type == 'removed') {
+                console.log("remove info detected in waiting");
+                //hangup()
+                hangup()
+            }
+        });
+    });
+
+    collectIceCandidates(callDoc, "caller", "callee")
+
+    // Get candidates for caller, save to db
+    //pc.onicecandidate = (event) => {
+    //    event.candidate && offerCandidates.add(event.candidate.toJSON());
+    //};
+
+
+    // Create offer
+    if (pc) {
+        const offerDescription = await pc.createOffer();
+        await pc.setLocalDescription(offerDescription);
+
+        const offer = {
+            sdp: offerDescription.sdp,
+            type: offerDescription.type,
+        };
+
+        await callDoc.set({ offer });
+    }
+
+    // When answered, add candidate to peer connection
+    //answerCandidates.onSnapshot((snapshot) => {
+    //    snapshot.docChanges().forEach((change) => {
+    //        if (change.type === 'added') {
+    //            const candidate = new RTCIceCandidate(change.doc.data());
+    // /           pc.addIceCandidate(candidate);
+    //        }
+    //    });
+    //});
+
+    //hangupButton.disabled = false;
+};
 
 hangupButton.onclick = async () => {
     hangup();
