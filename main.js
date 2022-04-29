@@ -32,7 +32,7 @@ const servers = {
 };
 
 // Global State
-const pc = new RTCPeerConnection(servers);
+var pc = new RTCPeerConnection(servers);
 let localStream = null;
 let remoteStream = null;
 
@@ -55,44 +55,15 @@ var iceListener;
 
 var roomId;
 
-// 1. Setup media sources
-
-const fetchMeetings = async () => {
-
-    const callDoc = firestore.collection('plannedInterviews').doc("Wout")
-    const data = await callDoc.get();
-    const key_value_pairs = data.data();
-
-    plannedInterviewsList.innerHTML = ''
-    Object.entries(key_value_pairs).forEach(([key, value]) => {
-        console.log(`${key}: ${value}`)
-
-
-        var button = document.createElement('button');
-        button.innerHTML = value;
-        button.onclick = function () { call(key); }
-
-
-        plannedInterviewsList.appendChild(button)
-
-    });
-
-
-};
-
-
-
-
-
-
 
 const setUpWebRTC = async () => {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 
     remoteStream = new MediaStream();
-    console.log('hello')
+
     // Push tracks from local stream to peer connection
     localStream.getTracks().forEach((track) => {
+        console.log("adding local stream to pc webapp")
         pc.addTrack(track, localStream);
     });
 
@@ -100,6 +71,7 @@ const setUpWebRTC = async () => {
 
     // Pull tracks from remote stream, add to video stream
     pc.ontrack = (event) => {
+        console.log("found remote tracks")
         event.streams[0].getTracks().forEach((track) => {
             remoteStream.addTrack(track);
         });
@@ -202,9 +174,14 @@ const hangup = async () => {
             console.log("failure with cleining firebase")
             console.log(e)
         });
+        pc.close();
+        pc = new RTCPeerConnection(servers);
 
         // removed planned interviews
 
+    }
+    else{
+        console.log("already hung up ERROR")
     }
     //navigation.navigate('HomeScreen');
 
@@ -215,6 +192,9 @@ const hangup = async () => {
 const streamCleanUp = async () => {
     if (localStream) {
         localStream.getTracks().forEach(t => t.stop());
+        if(remoteStream){
+            remoteStream.getTracks().forEach(t => t.stop());
+        }
         //localStream.release();
         localStream = null;
         remoteStream = null;
@@ -265,29 +245,20 @@ callDoc.onSnapshot((snapshot) => {
     plannedInterviewsList.innerHTML = ''
     if (snapshot.data()) {
         Object.entries(snapshot.data()).forEach(([key, value]) => {
-            //console.log(`${key}: ${value}`)
-            //var node = document.createElement('li');
-            //node.appendChild(document.createTextNode(value));
-
             var button = document.createElement('button');
             button.innerHTML = value;
             button.onclick = function () { call(key); }
 
-            //button.setAttribute('onclick','call(' +key + ')')
 
             plannedInterviewsList.appendChild(button)
         });
     }
 
-    //var node = document.createElement('li');
-    // node.appendChild(document.createTextNode('Scooter'));
-    //plannedInterviewsList.appendChild(node)
 
 });
 
 
 
-//fetchMeetings()
 
 
 const call = async (chatId) => {
@@ -339,32 +310,10 @@ const call = async (chatId) => {
         await callDoc.set({ offer });
     }
 
-    // When answered, add candidate to peer connection
-    //answerCandidates.onSnapshot((snapshot) => {
-    //    snapshot.docChanges().forEach((change) => {
-    //        if (change.type === 'added') {
-    //            const candidate = new RTCIceCandidate(change.doc.data());
-    // /           pc.addIceCandidate(candidate);
-    //        }
-    //    });
-    //});
-
-    //hangupButton.disabled = false;
 };
 
 hangupButton.onclick = async () => {
     hangup();
 }
-
-/** 
-
-var plannedInterviewsList = document.getElementById("plannedInterviews");
-inviteButton.onclick = async () => {
-    var node = document.createElement('li');
-    node.appendChild(document.createTextNode('Scooter'));
-    plannedInterviewsList.appendChild(node)
-}
-
-*/
 
 
