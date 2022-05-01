@@ -17,7 +17,7 @@ export default function SelectJoinScreen({ navigation }) {
    
     const [roomCode, onChangeMeetingLinkInput] = useState<string>();
   
-
+    
     // display uw local stream
     return (
         <View style={styles.container}>

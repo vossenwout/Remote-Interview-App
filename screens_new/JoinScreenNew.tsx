@@ -31,28 +31,16 @@ const configuration = { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }
 export default function JoinScreen({ route, navigation }) {
   const [localStream, setLocalStream] = useState<MediaStream | null>()
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>()
-  const [test, setTest] = useState<String>()
+
   const pc = useRef<RTCPeerConnection>();
 
   var iceListener;
-
+  var subscribeDelete;
 
   // Gets called when componen mounts
   useEffect(() => {
     console.log("using effect")
     const cRef = firestore().collection('meet').doc(route.params.roomCode);
-
-
-    // On delte of collection call hangup
-    // The other side has clicked on hangup
-    const subscribeDelete = cRef.collection('callee').onSnapshot(snapshot => {
-      snapshot.docChanges().forEach((change) => {
-        if (change.type == 'removed') {
-          console.log("Hung up");
-          hangup()
-        }
-      });
-    });
 
 
     const join = async () => {
@@ -61,6 +49,17 @@ export default function JoinScreen({ route, navigation }) {
       const offer = (await cRef.get()).data()?.offer;
 
       if (offer) {
+
+        // On delte of collection call hangup
+        // The other side has clicked on hangup
+        subscribeDelete = cRef.collection('callee').onSnapshot(snapshot => {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type == 'removed') {
+              console.log("Hung up");
+              hangup()
+            }
+          });
+        });
 
         // Setup Webrtc
         await setUpWebrtc()
@@ -99,6 +98,13 @@ export default function JoinScreen({ route, navigation }) {
           });
         }
       }
+      else{
+        console.log("call not ready yet")
+        if (navigation.canGoBack()) {
+          navigation.goBack()
+        }
+
+      }
 
     };
 
@@ -108,7 +114,9 @@ export default function JoinScreen({ route, navigation }) {
       if (iceListener) {
         iceListener();
       }
-      subscribeDelete();
+      if (subscribeDelete) {
+        subscribeDelete();
+      }
     }
 
 
@@ -126,7 +134,7 @@ export default function JoinScreen({ route, navigation }) {
       setLocalStream(stream);
       pc.current.addStream(stream);
     }
-    else{
+    else {
       console.log("stream could not be caught")
     }
 
@@ -141,7 +149,7 @@ export default function JoinScreen({ route, navigation }) {
     if (pc.current) {
 
       console.log("hanging up joining")
-      
+
 
       await streamCleanUp().catch(e => {
         console.log("failure with cleaning stream")
@@ -166,7 +174,7 @@ export default function JoinScreen({ route, navigation }) {
       const callDoc = firestore().collection('plannedInterviews').doc("Wout")
       const chatId = route.params.roomCode
       var removePlannedInterviews = callDoc.update({
-          chatId: firebase.firestore.FieldValue.delete()
+        chatId: firebase.firestore.FieldValue.delete()
       });
 
 
@@ -192,7 +200,7 @@ export default function JoinScreen({ route, navigation }) {
       if (pc.current) {
         pc.current.close();
         pc.current = null;
-        
+
         if (navigation.canGoBack()) {
           navigation.goBack()
         }
@@ -210,7 +218,7 @@ export default function JoinScreen({ route, navigation }) {
     if (localStream) {
       localStream.getTracks().forEach(t => t.stop());
       localStream.release();
-      if(remoteStream){
+      if (remoteStream) {
         remoteStream.getTracks().forEach(t => t.stop());
         remoteStream.release();
       }
@@ -294,7 +302,7 @@ export default function JoinScreen({ route, navigation }) {
 
   if (localStream) {
     console.log("reloading stream")
-    if (remoteStream){
+    if (remoteStream) {
       console.log("remote")
     }
 
@@ -302,7 +310,6 @@ export default function JoinScreen({ route, navigation }) {
     return (
       <View style={styles.videoContainer}>
         <Video hangup={hangup} localStream={localStream} remoteStream={remoteStream} />
-        <Button title="relotad" onPress={() => { setTest("da")}}/>
       </View>
     )
 

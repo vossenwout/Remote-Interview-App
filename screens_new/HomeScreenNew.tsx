@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import InvitationsScrollView from '../components/InvitationsScrollView';
+import GreenBackgroundBlob from '../components/GreenBackgroundBlob';
 
 import Video from '../components/Video'
 
@@ -22,6 +24,7 @@ import {
 
 import Utils from "../Utils"
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 
 const configuration = { "iceServers": [{ "url": "stun:stun.l.google.com:19302" }] };
@@ -79,11 +82,13 @@ export default function HomeScreen({ navigation }) {
 
 
     return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text>Planned interviews </Text>
-            {componentArray}
+        <SafeAreaProvider>
+        <GreenBackgroundBlob/>
 
-        </View>
+        <InvitationsScrollView navigation = {navigation} />
+
+
+      </SafeAreaProvider>
     );
 
 

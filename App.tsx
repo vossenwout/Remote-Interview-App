@@ -11,11 +11,15 @@ import TestScreen from './screens/TestScreen';
 import SelectJoinScreen from './screens/SelectJoinScreen';
 import SelectCreateScreen from './screens/SelectCreateScreen';
 import CreateRoomScreen from './screens/CreateRoomScreen';
+import HomeScreenNew from './screens_new/HomeScreenNew';
+import JoinScreenNew from './screens_new/JoinScreenNew';
 
 
 
 const Stack = createNativeStackNavigator();
 
+
+/**Run old 
 function App() {
     return (
       <NavigationContainer>
@@ -30,5 +34,16 @@ function App() {
       </NavigationContainer>
     );
   }
+*/
 
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="HomeScreenNew" screenOptions={{headerShown:false}}>
+        <Stack.Screen name="HomeScreenNew" component={HomeScreenNew}/>
+        <Stack.Screen name="JoinScreenNew" component={JoinScreenNew}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 export default App;
