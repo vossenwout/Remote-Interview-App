@@ -245,12 +245,17 @@ callDoc.onSnapshot((snapshot) => {
     plannedInterviewsList.innerHTML = ''
     if (snapshot.data()) {
         Object.entries(snapshot.data()).forEach(([key, value]) => {
+            const listEntry = document.createElement('li');
             var button = document.createElement('button');
             button.innerHTML = value;
+            button.classList.add("btn");
+            button.classList.add("btn-primary");
             button.onclick = function () { call(key); }
 
 
-            plannedInterviewsList.appendChild(button)
+            listEntry.appendChild(button);
+            plannedInterviewsList.appendChild(listEntry);
+
         });
     }
 
